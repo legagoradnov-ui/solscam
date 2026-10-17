@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SOLSCAM Terminal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.321.0/dist/umd/lucide.min.js"></script>
+    <!-- Google Fonts - JetBrains Mono & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #030407;
+            color: #e2e8f0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .bg-terminal {
+            background: radial-gradient(circle at 50% 0%, #0d111a 0%, #030407 80%);
+        }
+
+        .strict-card {
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+        }
+
+        .strict-disclaimer {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-left: 3px solid #ef4444;
+        }
+
+        .btn-strict {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .btn-strict:active {
+            transform: scale(0.98);
+            background: #0f172a;
+        }
+
+        .btn-primary-strict {
+            background: #ffffff;
+            color: #000000;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary-strict:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-primary-strict:active {
+            transform: scale(0.98);
+            background: #cbd5e1;
+        }
+
+        .input-strict {
+            background: rgba(5, 7, 12, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .input-strict:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #030407; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; }
+    </style>
+</head>
+<body class="bg-terminal min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 overflow-x-hidden selection:bg-slate-700 selection:text-white relative">
+
+    <!-- Top Glow Grid Accents -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-48 bg-gradient-to-b from-slate-800/10 to-transparent pointer-events-none"></div>
+
+    <header class="w-full max-w-md flex justify-between items-center py-3 px-1 z-10 border-b border-white/5">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center text-slate-200 shadow-inner">
+                <i data-lucide="terminal" class="w-4 h-4 text-slate-300"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-black text-lg tracking-widest text-white leading-none font-mono-code uppercase">SOLSCAM</span>
+                <span class="text-[9px] text-slate-500 font-mono-code font-semibold tracking-wider uppercase mt-1">Terminal v3.1.0</span>
+            </div>
+        </div>
+        <div id="user-badge" class="hidden items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-mono-code text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span id="user-name" class="font-medium text-[11px]">User</span>
+        </div>
+    </header>
+
+    <main class="w-full max-w-md my-auto py-6 z-10 flex flex-col items-center justify-center">
+
+        <div id="main-card" class="w-full strict-card rounded-2xl p-5 sm:p-6 transition-all duration-200 relative">
+
+            <!-- Strict Disclaimer Box -->
+            <div class="mb-5 p-3.5 strict-disclaimer rounded-xl flex items-start space-x-3 text-left relative">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i>
+                <div class="space-y-1">
+                    <span class="text-[11px] font-bold text-red-400 font-mono-code uppercase tracking-wider block">Дисклеймер</span>
+                    <p class="text-xs leading-relaxed text-slate-300 font-normal">
+                        Не является финансовой рекомендацией. Мемкоины крайне рискованны, можно потерять все вложенные средства. Бот лишь показывает данные, решения вы принимаете сами.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Promo Input Form -->
+            <div id="promo-form" class="space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center px-0.5">
+                        <label for="promo-input" class="text-xs font-medium text-slate-400 font-mono-code uppercase tracking-wider">
+                            Промокод
+                        </label>
+                        <span class="text-[10px] text-slate-600 font-mono-code">STATUS: REQUIRED</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input 
+                            type="text" 
+                            id="promo-input" 
+                            placeholder="Введите промокод" 
+                            autocomplete="off"
+                            spellcheck="false"
+                            class="w-full input-strict rounded-xl px-4 py-3.5 text-sm font-mono-code text-white placeholder-slate-600 outline-none transition-all duration-200 tracking-wider uppercase font-semibold"
+                        />
+                        <button 
+                            id="clear-btn" 
+                            type="button" 
+                            class="hidden absolute right-3 p-1.5 text-slate-500 hover:text-white bg-slate-800/60 rounded-lg transition-all"
+                            onclick="clearInput()"
+                        >
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div id="error-message" class="hidden flex items-center space-x-1.5 mt-2 text-xs text-red-400 px-0.5 font-mono-code">
+                        <i data-lucide="x-circle" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span id="error-text">Неверный промокод</span>
+                    </div>
+                </div>
+
+                <button 
+                    id="submit-btn" 
+                    onclick="activatePromo()" 
+                    class="w-full btn-primary-strict font-extrabold py-3.5 px-4 rounded-xl text-xs font-mono-code tracking-wider uppercase flex items-center justify-center space-x-2 cursor-pointer mt-3 shadow-lg"
+                >
+                    <span>Активировать доступ</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div id="success-view" class="hidden flex-col items-center text-center py-2 space-y-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-inner">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-base font-bold text-white font-mono-code uppercase tracking-wider mb-1">Доступ Подтвержден</h2>
+                    <p class="text-xs text-slate-400">Код <span class="text-emerald-400 font-mono-code font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">VOVALOX</span> успешно активирован</p>
+                </div>
+
+                <div class="w-full bg-slate-950/80 rounded-xl p-3.5 border border-slate-800/80 text-left space-y-2.5 my-1 font-mono-code text-xs">
+                    <div class="flex items-center space-x-2.5 text-slate-300">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                        <span>Аналитический модуль Solana</span>
+                    </div>
+                    <div class="flex items-center space-x-2.5 text-slate-300">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                        <span>Мониторинг кошельков китов</span>
+                    </div>
+                    <div class="flex items-center space-x-2.5 text-slate-300">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                        <span>Расширенные фильтры токенов</span>
+                    </div>
+                </div>
+
+                <button 
+                    onclick="closeOrRedirect()" 
+                    class="w-full btn-strict text-slate-100 font-extrabold py-3.5 px-4 rounded-xl text-xs font-mono-code tracking-wider uppercase flex items-center justify-center space-x-2 cursor-pointer shadow-md"
+                >
+                    <i data-lucide="terminal" class="w-4 h-4"></i>
+                    <span>Запустить терминал</span>
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-md text-center py-2 text-[10px] font-mono-code text-slate-600 z-10 flex flex-col items-center space-y-1">
+        <div class="flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+            <span>SOLSCAM SECURE ENGINE</span>
+        </div>
+        <p>&copy; 2026 SOLSCAM. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const tg = window.Telegram?.WebApp;
+
+        function safeInitIcons() {
+            try {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            } catch (err) {
+                console.warn("Lucide icons load skipped:", err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            safeInitIcons();
+
+            if (tg) {
+                try {
+                    tg.ready();
+                    tg.expand();
+                    tg.setHeaderColor('#030407');
+                    tg.setBackgroundColor('#030407');
+                } catch (e) {
+                    console.log("Telegram SDK setup complete");
+                }
+
+                try {
+                    if (tg.initDataUnsafe?.user) {
+                        const user = tg.initDataUnsafe.user;
+                        const userNameEl = document.getElementById('user-name');
+                        const userBadgeEl = document.getElementById('user-badge');
+                        
+                        if (userNameEl && userBadgeEl) {
+                            userNameEl.textContent = user.first_name || user.username || 'User';
+                            userBadgeEl.classList.remove('hidden');
+                            userBadgeEl.classList.add('flex');
+                        }
+                    }
+                } catch (e) {
+                    console.log("User data reading error");
+                }
+            }
+
+            const promoInput = document.getElementById('promo-input');
+            const clearBtn = document.getElementById('clear-btn');
+
+            if (promoInput) {
+                promoInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+
+                    if (e.target.value.length > 0) {
+                        clearBtn?.classList.remove('hidden');
+                    } else {
+                        clearBtn?.classList.add('hidden');
+                    }
+                    hideError();
+                });
+
+                promoInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        activatePromo();
+                    }
+                });
+            }
+        });
+
+        function clearInput() {
+            const promoInput = document.getElementById('promo-input');
+            const clearBtn = document.getElementById('clear-btn');
+            if (promoInput) promoInput.value = '';
+            if (clearBtn) clearBtn.classList.add('hidden');
+            hideError();
+            if (promoInput) promoInput.focus();
+            triggerHaptic('light');
+        }
+
+        function triggerHaptic(style) {
+            try {
+                if (tg && tg.HapticFeedback) {
+                    if (style === 'error') {
+                        tg.HapticFeedback.notificationOccurred('error');
+                    } else if (style === 'success') {
+                        tg.HapticFeedback.notificationOccurred('success');
+                    } else if (style === 'light') {
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
+                }
+            } catch (e) {
+                // Ignore fallback
+            }
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const promoInput = document.getElementById('promo-input');
+
+            if (errorText) errorText.textContent = message;
+            if (errorMsg) errorMsg.classList.remove('hidden');
+            
+            if (promoInput) {
+                promoInput.classList.remove('border-white/12');
+                promoInput.classList.add('border-red-500/80');
+            }
+
+            triggerHaptic('error');
+        }
+
+        function hideError() {
+            const errorMsg = document.getElementById('error-message');
+            const promoInput = document.getElementById('promo-input');
+
+            if (errorMsg) errorMsg.classList.add('hidden');
+            if (promoInput) {
+                promoInput.classList.remove('border-red-500/80');
+                promoInput.classList.add('border-white/12');
+            }
+        }
+
+        function launchConfetti() {
+            try {
+                if (typeof window.confetti === 'function') {
+                    window.confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.6 },
+                        colors: ['#ffffff', '#94a3b8', '#10b981']
+                    });
+                }
+            } catch (e) {
+                console.log("Confetti skipped");
+            }
+        }
+
+        function activatePromo() {
+            const promoInput = document.getElementById('promo-input');
+            const code = promoInput ? promoInput.value.trim().toUpperCase() : '';
+
+            if (!code) {
+                showError("Введите промокод");
+                return;
+            }
+
+            if (code === "VOVALOX") {
+                triggerHaptic('success');
+                launchConfetti();
+
+                const promoForm = document.getElementById('promo-form');
+                const successView = document.getElementById('success-view');
+
+                if (promoForm) promoForm.classList.add('hidden');
+                if (successView) {
+                    successView.classList.remove('hidden');
+                    successView.classList.add('flex');
+                }
+
+                try {
+                    if (tg && tg.CloudStorage) {
+                        tg.CloudStorage.setItem('promo_activated', 'true');
+                        tg.CloudStorage.setItem('promo_code', 'VOVALOX');
+                    }
+                } catch (e) {
+                    console.log("CloudStorage unavailable");
+                }
+
+            } else {
+                showError("Неверный промокод");
+            }
+        }
+
+        function closeOrRedirect() {
+            triggerHaptic('light');
+            try {
+                if (tg && typeof tg.sendData === 'function') {
+                    tg.sendData(JSON.stringify({
+                        action: 'promo_activated',
+                        code: 'VOVALOX',
+                        status: 'success'
+                    }));
+                    tg.close();
+                } else {
+                    alert("Промокод VOVALOX активирован.");
+                }
+            } catch (e) {
+                alert("Промокод VOVALOX активирован.");
+            }
+        }
+    </script>
+</body>
+</html>
